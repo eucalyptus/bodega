@@ -1,3 +1,14 @@
+*~
+.sw*
+.*.sw*
+.DS_Store
+.nfs*
+.project
+core
+core.*
+*.o
+*.pyc
+*.pyo
 *.class
 
 # Package Files #
