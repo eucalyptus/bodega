@@ -1,0 +1,24 @@
+<ivysettings>
+    <settings defaultResolver="default">
+        <property name="local-maven2-pattern"
+            value="/usr/share/maven-repo/[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"
+            override="false" />
+        <resolvers>
+            <chain name="default" returnFirst="true">
+                <filesystem
+                    name="local-maven2"
+                    m2compatible="true" >
+                    <ivy pattern="${local-maven2-pattern}"/>
+                    <artifact pattern="${local-maven2-pattern}"/>
+                </filesystem>
+                <filesystem name="1">
+                    <artifact pattern="/usr/share/java/[artifact]-[revision].[ext]"/>
+                </filesystem>
+                <filesystem name="2">
+                    <artifact pattern="/usr/share/java/[artifact].[ext]"/>
+                </filesystem>
+            </chain>
+        </resolvers>
+    </settings>
+</ivysettings>
+

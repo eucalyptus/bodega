@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+    xmlns:distools="antlib:org.eucalyptus.tasks.linuxtools"
+    name="bodega" default="default">
+
+    <ivy:settings file="settings/ivysettings.xml" />
+
+    <target name="init">
+        <!-- Prepare directories -->
+        <mkdir dir="lib" />
+        <mkdir dir="dist" />
+        <!-- Build task jar for Linux distribution discovery -->
+        <ant dir="ant-linuxtools" target="jar" />
+        <available file="ant-linuxtools/dist/linuxtools-0.01.jar"
+            property="linuxtools.exists" />
+        <fail message="Missing linuxtools tasks jar"
+            unless="linuxtools.exists" />
+    </target>
+
+    <target name="resolve" depends="init">
+        <taskdef uri="antlib:org.eucalyptus.tasks.linuxtools"
+            resource="org/eucalyptus/tasks/linuxtools/antlib.xml"
+            classpath="ant-linuxtools/dist/linuxtools-0.01.jar" />
+
+        <distools:getdistroname property="distro.name" />
+        <condition property="distro.name" else="default">
+            <isset property="distro.name" />
+        </condition>
+        <property file="settings/${distro.name}.properties" />
+        <ivy:retrieve />
+    </target>
+
+    <target name="clean">
+        <delete dir="lib" />
+        <delete dir="dist" />
+        <ant dir="ant-linuxtools" target="clean" />
+    </target>
+
+    <target name="compile" depends="init,resolve">
+    <!-- TODO: We need something to compile -->
+    </target>
+
+    <target name="jar" depends="compile" />
+
+    <target name="default" depends="jar" />
+</project>
+
