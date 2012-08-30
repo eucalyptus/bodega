@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
-    xmlns:distools="antlib:org.eucalyptus.tasks.linuxtools"
+    xmlns:linuxtools="antlib:org.eucalyptus.tasks.linuxtools"
     name="bodega" default="default">
 
     <ivy:settings file="settings/ivysettings.xml" />
@@ -22,7 +22,7 @@
             resource="org/eucalyptus/tasks/linuxtools/antlib.xml"
             classpath="ant-linuxtools/dist/linuxtools-0.01.jar" />
 
-        <distools:getdistroname property="distro.name" />
+        <linuxtools:detectdistro />
         <condition property="distro.name" else="default">
             <isset property="distro.name" />
         </condition>
