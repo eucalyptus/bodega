@@ -32,6 +32,7 @@ class Importer(EucaDatawarehouse):
         parser.add_option_group( self.get_db_option_group( parser ) )
 
         (options, args) = parser.parse_args()
+        options = self.add_config_defaults( options )
         if options.filename is None:
             parser.error( 'file is required' )
 
