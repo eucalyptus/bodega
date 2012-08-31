@@ -3,15 +3,26 @@
     xmlns:linuxtools="antlib:org.eucalyptus.tasks.linuxtools"
     name="bodega" default="default">
 
+    <property name="build.dir" location="build" />
+    <property name="build.classes.dir"
+        location="${build.dir}/classes" />
+    <property name="dist.dir" location="dist" />
+    <property name="lib.dir" location="lib" />
+    <property name="bodega.version" value="0.01" />
+    <property name="bodega.jar" value="${dist.dir}/bodega-${bodega.version}.jar"/>
+    <path id="classpath.ref">
+        <fileset dir="lib" includes="**/*.jar"/>
+    </path>
     <ivy:settings file="settings/ivysettings.xml" />
 
     <target name="init">
         <!-- Prepare directories -->
-        <mkdir dir="lib" />
-        <mkdir dir="dist" />
+        <mkdir dir="${build.classes.dir}" />
+        <mkdir dir="${dist.dir}" />
+        <mkdir dir="${lib.dir}" />
         <!-- Build task jar for Linux distribution discovery -->
         <ant dir="ant-linuxtools" target="jar" />
-        <available file="ant-linuxtools/dist/linuxtools-0.01.jar"
+        <available file="${dist.dir}/linuxtools-0.01.jar"
             property="linuxtools.exists" />
         <fail message="Missing linuxtools tasks jar"
             unless="linuxtools.exists" />
@@ -20,7 +31,7 @@
     <target name="resolve" depends="init">
         <taskdef uri="antlib:org.eucalyptus.tasks.linuxtools"
             resource="org/eucalyptus/tasks/linuxtools/antlib.xml"
-            classpath="ant-linuxtools/dist/linuxtools-0.01.jar" />
+            classpath="${dist.dir}/linuxtools-0.01.jar" />
 
         <linuxtools:detectdistro />
         <condition property="distro.name" else="default">
@@ -31,16 +42,25 @@
     </target>
 
     <target name="clean">
-        <delete dir="lib" />
-        <delete dir="dist" />
+        <delete dir="${build.classes.dir}" />
+        <delete dir="${dist.dir}" />
+        <delete dir="${lib.dir}" />
         <ant dir="ant-linuxtools" target="clean" />
     </target>
 
     <target name="compile" depends="init,resolve">
-    <!-- TODO: We need something to compile -->
+        <javac srcdir="src" destdir="${build.classes.dir}"
+            includeantruntime="true" classpathref="classpath.ref"/>
+        <copy todir="${build.classes.dir}">
+            <fileset dir="src" includes="**/*.xml,**/*.properties"/>
+        </copy>
     </target>
 
-    <target name="jar" depends="compile" />
+    <target name="jar" depends="compile">
+        <jar destfile="${bodega.jar}">
+            <fileset dir="${build.classes.dir}" includes="**/*" />
+        </jar>
+    </target>
 
     <target name="default" depends="jar" />
 </project>
