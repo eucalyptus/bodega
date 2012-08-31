@@ -19,10 +19,14 @@
 import re
 import sys
 import os
+import subprocess
 from ConfigParser import ConfigParser
-from optparse import OptionGroup
+from optparse import OptionGroup, OptionParser
 
 class EucaDatawarehouse():
+
+    options = []
+
     config_defaults = {
         'db_host': 'localhost',
         'db_port': '5432',
@@ -43,9 +47,21 @@ class EucaDatawarehouse():
         dbgroup.add_option("-s", "--database-use-ssl", dest="db_ssl", action="store_true", help="Database connections use SSL")
         return dbgroup
 
+    def get_config_option_group( self, parser ):
+        dbgroup = OptionGroup( parser, "Configuration Default Options",
+            "Options for loading configuration defaults")
+        dbgroup.add_option("-C", "--config-file", dest="config_file", help="Load configuration from the specified file")
+        dbgroup.add_option("-I", "--config-ignore", dest="config_ignore", action="store_true", help="Ignore configuration files unless explicitly specified")
+        return dbgroup
+
     def add_config_defaults( self, options ):
         config = ConfigParser()
-        config.read( [ 'eucadw.cfg', os.path.expanduser('~/.eucadw/eucadw.cfg'), '/etc/eucadw/eucadw.cfg' ] )
+        config_files = []
+        if options.config_file is not None:
+            config_files.append( options.config_file )
+        if not options.config_ignore:
+            config_files = config_files + [ 'eucadw.cfg', os.path.expanduser('~/.eucadw/eucadw.cfg'), '/etc/eucadw/eucadw.cfg' ]
+        config.read( config_files )
         if config.has_section( 'database' ):
             for ( name, value ) in config.items( 'database' ):
                 option_name = 'db_' + name
@@ -71,7 +87,28 @@ class EucaDatawarehouse():
         command.append( options.db_pass )
         if options.db_ssl:
             command.append( '-dbs' )
-        return command   
+        return command
+
+    def run_java_command( self, options, command_class, command_args ):
+        command = self.get_java_command( options, command_class )
+        command = command + command_args
+        subprocess.call( command )
+
+    def command( self, parser, options, args ):
+        pass
+
+    def main_cli( self ):
+        parser = OptionParser( option_list = self.options )
+        parser.add_option_group( self.get_db_option_group( parser ) )
+        parser.add_option_group( self.get_config_option_group( parser ) )
+        (options, args) = parser.parse_args()
+        options = self.add_config_defaults( options )
+        try:
+            self.command( parser, options, args )
+        except IOError as e:
+            sys.exit(e)
+
+
 
 
 

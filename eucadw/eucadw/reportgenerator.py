@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2009-2012 Eucalyptus Systems, Inc.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,9 +16,32 @@
 # CA 93117, USA or visit http://www.eucalyptus.com/licenses/ if you need
 # additional information or have any questions.
 
-from eucadw.importer import Importer
+import os
+from optparse import make_option as option
+from eucadw import EucaDatawarehouse
 
-if __name__ == "__main__":
-    r = Importer()
-    r.main_cli()
+class ReportGenerator(EucaDatawarehouse):
+
+    options = [
+        option( '-f', '--file', dest="filename",
+            help='The path to the generated report file' ),
+        ]
+
+    def check_report_file(self, file):
+        if os.path.exists( file ):
+            msg = 'file %s already exists, ' % file
+            msg += 'please remove and try again'
+            raise IOError(msg)
+
+    def command( self, parser, options, args ):
+        if options.filename is None:
+            parser.error( 'file is required' )
+        self.check_report_file( options.filename )
+
+        command = [ ]
+        command.append( '-f' )
+        command.append( options.filename )
+
+        self.run_java_command( options, 'ReportCommand', command )
+
 

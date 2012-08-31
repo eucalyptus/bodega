@@ -16,32 +16,28 @@
 # CA 93117, USA or visit http://www.eucalyptus.com/licenses/ if you need
 # additional information or have any questions.
 
-from optparse import OptionParser, OptionGroup
-import subprocess
+from optparse import make_option as option
 from eucadw import EucaDatawarehouse
 
 class Importer(EucaDatawarehouse):
 
-    def main_cli( self ):
-        parser = OptionParser()
-        parser.add_option("-f", "--file", dest="filename",
-                          help="Export file for importing")
-        parser.add_option("-r", "--replace", dest="replace", action="store_true",
-                          help="Replace existing data")
+    options = [
+        option( '-f', '--file', dest="filename",
+            help='Export file for importing' ),
+        option( '-r', '--replace', dest='replace', action='store_true',
+            help='Replace existing data'),
+        ]
 
-        parser.add_option_group( self.get_db_option_group( parser ) )
-
-        (options, args) = parser.parse_args()
-        options = self.add_config_defaults( options )
+    def command( self, parser, options, args ):
         if options.filename is None:
             parser.error( 'file is required' )
 
-        command = self.get_java_command( options, 'ImportCommand' )
+        command = [ ]
         if options.replace:
             command.append( '-r' )        
         command.append( '-e' )
         command.append( options.filename )
 
-        subprocess.call( command )
+        self.run_java_command( options, 'ImportCommand', command )
         
 
