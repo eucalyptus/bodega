@@ -47,12 +47,14 @@ class EucaDatawarehouse():
         dbgroup.add_option("-s", "--database-use-ssl", dest="db_ssl", action="store_true", help="Database connections use SSL")
         return dbgroup
 
-    def get_config_option_group( self, parser ):
-        dbgroup = OptionGroup( parser, "Configuration Default Options",
-            "Options for loading configuration defaults")
-        dbgroup.add_option("-C", "--config-file", dest="config_file", help="Load configuration from the specified file")
-        dbgroup.add_option("-I", "--config-ignore", dest="config_ignore", action="store_true", help="Ignore configuration files unless explicitly specified")
-        return dbgroup
+    def get_common_option_group( self, parser ):
+        common_group = OptionGroup( parser, "Common Options",
+            "Options applicable to any command")
+        common_group.add_option("-C", "--config-file", dest="config_file", help="Load configuration from the specified file")
+        common_group.add_option("-I", "--config-ignore", dest="config_ignore", action="store_true", help="Ignore configuration files unless explicitly specified")
+        common_group.add_option("-D", "--debug", dest="logging_debug", action="store_true", help="Enable debug logging")
+        common_group.add_option("-S", "--silent", dest="logging_silent", action="store_true", help="Suppress logging output")
+        return common_group
 
     def add_config_defaults( self, options ):
         config = ConfigParser()
@@ -87,12 +89,20 @@ class EucaDatawarehouse():
         command.append( options.db_pass )
         if options.db_ssl:
             command.append( '-dbs' )
+        if options.logging_silent:
+            command.append( '-lt' )
+            command.append( 'silent' )
+        elif options.logging_debug:
+            command.append( '-lt' )
+            command.append( 'debug' )
         return command
 
     def run_java_command( self, options, command_class, command_args ):
         command = self.get_java_command( options, command_class )
         command = command + command_args
-        subprocess.call( command )
+        status = subprocess.call( command )
+        if status is not 0:
+            sys.exit( status )
 
     def command( self, parser, options, args ):
         pass
@@ -100,7 +110,7 @@ class EucaDatawarehouse():
     def main_cli( self ):
         parser = OptionParser( option_list = self.options )
         parser.add_option_group( self.get_db_option_group( parser ) )
-        parser.add_option_group( self.get_config_option_group( parser ) )
+        parser.add_option_group( self.get_common_option_group( parser ) )
         (options, args) = parser.parse_args()
         options = self.add_config_defaults( options )
         try:

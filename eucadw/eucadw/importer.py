@@ -35,7 +35,7 @@ class Importer(EucaDatawarehouse):
         command = [ ]
         if options.replace:
             command.append( '-r' )        
-        command.append( '-e' )
+        command.append( '-f' )
         command.append( options.filename )
 
         self.run_java_command( options, 'ImportCommand', command )
