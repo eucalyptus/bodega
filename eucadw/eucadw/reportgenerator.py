@@ -25,7 +25,7 @@ class ReportGenerator(EucaDatawarehouse):
     options = [
         option( '-t', '--type',
             dest='types', type='choice', action='append',
-            choices=['instance', 's3', 'volume', 'snapshot'],
+            choices=['instance', 's3', 'volume', 'snapshot', 'raw'],
             help='report type(s) to generate. Option may be used multiple times'),
         option( '-s', '--start-date', dest='start_date',
             help='the inclusive start date for the report period (e.g. 2012-08-19)'),
