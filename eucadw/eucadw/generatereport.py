@@ -20,13 +20,13 @@ import os
 from optparse import make_option as option
 from eucadw import EucaDatawarehouse
 
-class ReportGenerator(EucaDatawarehouse):
+class GenerateReport(EucaDatawarehouse):
 
     options = [
         option( '-t', '--type',
-            dest='types', type='choice', action='append',
+            dest='type', type='choice',
             choices=['instance', 's3', 'volume', 'snapshot', 'raw'],
-            help='report type(s) to generate. Option may be used multiple times'),
+            help='the report type to generate'),
         option( '-s', '--start-date', dest='start_date',
             help='the inclusive start date for the report period (e.g. 2012-08-19)'),
         option( '-e', '--end-date', dest='end_date',
@@ -51,10 +51,9 @@ class ReportGenerator(EucaDatawarehouse):
             self.check_report_file( filename )
 
         command = [ ]
-        if options.types is not None:
-            for type in options.types:
-                command.append( '-t' )
-                command.append( type )
+        if options.type is not None:
+            command.append( '-t' )
+            command.append( options.type )
         if options.start_date is not None:
             command.append( '-s' )
             command.append( self.timestamp( options.start_date ) )

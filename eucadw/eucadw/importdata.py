@@ -19,7 +19,7 @@
 from optparse import make_option as option
 from eucadw import EucaDatawarehouse
 
-class Importer(EucaDatawarehouse):
+class ImportData(EucaDatawarehouse):
 
     options = [
         option( '-f', '--file', dest="filename",
