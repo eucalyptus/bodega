@@ -23,8 +23,16 @@ from eucadw import EucaDatawarehouse
 class ReportGenerator(EucaDatawarehouse):
 
     options = [
-        option( '-f', '--file', dest="filename",
-            help='The path to the generated report file' ),
+        option( '-t', '--type',
+            dest='types', type='choice', action='append',
+            choices=['instance', 's3', 'volume', 'snapshot'],
+            help='report type(s) to generate. Option may be used multiple times'),
+        option( '-s', '--start-date', dest='start_date',
+            help='the inclusive start date for the report period (e.g. 2012-08-19)'),
+        option( '-e', '--end-date', dest='end_date',
+            help='the exclusive end date for the report period (e.g. 2012-08-26)'),
+        option( '-f', '--force', dest='force', const=True, action='store_const',
+            help='overwrite output file if it exists' ),
         ]
 
     def check_report_file(self, file):
@@ -33,14 +41,29 @@ class ReportGenerator(EucaDatawarehouse):
             msg += 'please remove and try again'
             raise IOError(msg)
 
+    def timestamp( self, date ):
+        return date + 'T00:00:00'
+
     def command( self, parser, options, args ):
-        if options.filename is None:
-            parser.error( 'file is required' )
-        self.check_report_file( options.filename )
+        self.force = options.force
+        filename = args[0]
+        if not self.force and filename is not None:
+            self.check_report_file( filename )
 
         command = [ ]
-        command.append( '-f' )
-        command.append( options.filename )
+        if options.types is not None:
+            for type in options.types:
+                command.append( '-t' )
+                command.append( type )
+        if options.start_date is not None:
+            command.append( '-s' )
+            command.append( self.timestamp( options.start_date ) )
+        if options.end_date is not None:
+            command.append( '-e' )
+            command.append( self.timestamp( options.end_date ) )
+        if filename is not None:
+            command.append( '-f' )
+            command.append( filename )
 
         self.run_java_command( options, 'ReportCommand', command )
 

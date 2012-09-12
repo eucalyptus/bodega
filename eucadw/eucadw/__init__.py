@@ -44,7 +44,7 @@ class EucaDatawarehouse():
         dbgroup.add_option("-n", "--database-name", dest="db_name", help="Database name")
         dbgroup.add_option("-u", "--database-user", dest="db_user", help="Database username")
         dbgroup.add_option("-p", "--database-pass", dest="db_pass", help="Database password")
-        dbgroup.add_option("-s", "--database-use-ssl", dest="db_ssl", action="store_true", help="Database connections use SSL")
+        dbgroup.add_option("-l", "--database-use-ssl", dest="db_ssl", action="store_true", help="Database connections use SSL")
         return dbgroup
 
     def get_common_option_group( self, parser ):
