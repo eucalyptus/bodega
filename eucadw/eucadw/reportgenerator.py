@@ -46,7 +46,7 @@ class ReportGenerator(EucaDatawarehouse):
 
     def command( self, parser, options, args ):
         self.force = options.force
-        filename = args[0]
+        filename = args[0] if 0 < len(args) else None
         if not self.force and filename is not None:
             self.check_report_file( filename )
 
