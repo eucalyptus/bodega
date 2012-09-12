@@ -12,9 +12,12 @@
                     <artifact pattern="${local-maven2-pattern}"/>
                 </filesystem>
                 <filesystem name="1">
-                    <artifact pattern="/usr/share/java/[artifact]-[revision].[ext]"/>
+                    <artifact pattern="/usr/share/eucalyptus/[artifact]-[revision].[ext]"/>
                 </filesystem>
                 <filesystem name="2">
+                    <artifact pattern="/usr/share/java/[artifact]-[revision].[ext]"/>
+                </filesystem>
+                <filesystem name="3">
                     <artifact pattern="/usr/share/java/[artifact].[ext]"/>
                 </filesystem>
             </chain>

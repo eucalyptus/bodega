@@ -184,6 +184,15 @@
         <dependency org="xpp3"
             name="${xpp3.name}"
             rev="${xpp3.version}"/>
+        <dependency org="proxool"
+            name="${proxool.name}"
+            rev="${proxool.version}"/>
+        <dependency org="org.eucalyptus"
+            name="eucalyptus-msgs"
+            rev="3.2.0"/>
+        <dependency org="org.eucalyptus"
+            name="eucalyptus-reporting"
+            rev="3.2.0"/>
     </dependencies>
 </ivy-module>
 

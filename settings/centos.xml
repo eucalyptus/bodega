@@ -1,0 +1,12 @@
+<ivysettings>
+    <settings defaultResolver="default">
+        <resolvers>
+            <chain name="default" returnFirst="true">
+                <filesystem name="eucalyptus">
+                    <artifact pattern="/usr/share/eucalyptus/[artifact]-[revision].[ext]"/>
+                </filesystem>
+            </chain>
+        </resolvers>
+    </settings>
+</ivysettings>
+
