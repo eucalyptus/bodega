@@ -9,11 +9,10 @@
     <property name="dist.dir" location="dist" />
     <property name="lib.dir" location="lib" />
     <property name="bodega.version" value="0.01" />
-    <property name="bodega.jar" value="${dist.dir}/bodega-${bodega.version}.jar"/>
+    <property name="bodega.jar" value="${dist.dir}/bodega.jar"/>
     <path id="classpath.ref">
         <fileset dir="lib" includes="**/*.jar"/>
     </path>
-    <ivy:settings file="settings/ivysettings.xml" />
 
     <target name="init">
         <!-- Prepare directories -->
@@ -22,7 +21,7 @@
         <mkdir dir="${lib.dir}" />
         <!-- Build task jar for Linux distribution discovery -->
         <ant dir="ant-linuxtools" target="jar" />
-        <available file="${dist.dir}/linuxtools-0.01.jar"
+        <available file="${dist.dir}/linuxtools.jar"
             property="linuxtools.exists" />
         <fail message="Missing linuxtools tasks jar"
             unless="linuxtools.exists" />
@@ -31,13 +30,14 @@
     <target name="resolve" depends="init">
         <taskdef uri="antlib:org.eucalyptus.tasks.linuxtools"
             resource="org/eucalyptus/tasks/linuxtools/antlib.xml"
-            classpath="${dist.dir}/linuxtools-0.01.jar" />
+            classpath="${dist.dir}/linuxtools.jar" />
 
         <linuxtools:detectdistro />
         <condition property="distro.name" else="default">
             <isset property="distro.name" />
         </condition>
         <property file="settings/${distro.name}.properties" />
+        <ivy:settings file="settings/${distro.name}.xml" />
         <ivy:retrieve />
     </target>
 
