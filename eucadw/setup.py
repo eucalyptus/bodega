@@ -50,7 +50,9 @@ class build_scripts_with_path_headers(build_scripts):
             else:
                 print line.rstrip()
 
-admin_scripts = ["bin/eucadw-import",                 
+admin_scripts = [
+    "bin/eucadw-generate-report",
+    "bin/eucadw-import-data",
                 ]
 
 setup(name="eucadw",
