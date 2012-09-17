@@ -32,6 +32,9 @@
             resource="org/eucalyptus/tasks/linuxtools/antlib.xml"
             classpath="${dist.dir}/linuxtools.jar" />
 
+        <taskdef uri="antlib:org.apache.ivy.ant"
+            classpath="/usr/share/java/ivy.jar" />
+
         <linuxtools:detectdistro />
         <condition property="distro.name" else="default">
             <isset property="distro.name" />

@@ -3,7 +3,13 @@
         <resolvers>
             <chain name="default" returnFirst="true">
                 <filesystem name="eucalyptus">
+                    <artifact pattern="/usr/share/eucalyptus/[artifact].[ext]"/>
+                </filesystem>
+                <filesystem name="eucalyptus-versioned">
                     <artifact pattern="/usr/share/eucalyptus/[artifact]-[revision].[ext]"/>
+                </filesystem>
+                <filesystem name="centos">
+                    <artifact pattern="/usr/share/java/[artifact].[ext]"/>
                 </filesystem>
             </chain>
         </resolvers>

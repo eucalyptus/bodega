@@ -2,8 +2,8 @@
     <info organisation="org.eucalyptus" module="bodega"/>
     <dependencies>
         <dependency org="org.apache.ant"
-            name="ant"
-            rev="1.8.3"/>
+            name="${ant.name}"
+            rev="${ant.version}"/>
         <dependency org="antlr3"
             name="${antlr.name}"
             rev="${antlr.version}"/>
