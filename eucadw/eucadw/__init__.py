@@ -76,7 +76,7 @@ class EucaDatawarehouse():
 
     def get_java_command( self, options, command_class ):
         #TODO determine / detect correct install location for JAR files
-        command = [ 'java', '-cp', '/opt/datawarehouse/lib/*', 'com.eucalyptus.reporting.dw.commands.' + command_class ]
+        command = [ 'java', '-cp', '/usr/share/eucalyptus/*', 'com.eucalyptus.reporting.dw.commands.' + command_class ]
         command.append( '-dbh' )
         command.append( options.db_host )
         command.append( '-dbpo' )
