@@ -25,6 +25,10 @@
             property="linuxtools.exists" />
         <fail message="Missing linuxtools tasks jar"
             unless="linuxtools.exists" />
+
+        <!-- clean classes files from ant-linuxtools -->
+        <delete dir="${build.classes.dir}" />
+        <mkdir dir="${build.classes.dir}" />
     </target>
 
     <target name="resolve" depends="init">
