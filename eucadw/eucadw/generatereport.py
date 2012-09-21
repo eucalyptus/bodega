@@ -25,7 +25,7 @@ class GenerateReport(EucaDatawarehouse):
     options = [
         option( '-t', '--type',
             dest='type', type='choice',
-            choices=['instance', 's3', 'volume', 'snapshot', 'raw'],
+            choices=['elastic-ip', 'instance', 's3', 'snapshot', 'volume'],
             help='the report type to generate'),
         option( '-f', '--format',
             dest='format', type='choice',
