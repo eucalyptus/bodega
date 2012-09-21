@@ -27,11 +27,15 @@ class GenerateReport(EucaDatawarehouse):
             dest='type', type='choice',
             choices=['instance', 's3', 'volume', 'snapshot', 'raw'],
             help='the report type to generate'),
+        option( '-f', '--format',
+            dest='format', type='choice',
+            choices=['csv', 'html'],
+            help='the format for the generated report'),
         option( '-s', '--start-date', dest='start_date',
             help='the inclusive start date for the report period (e.g. 2012-08-19)'),
         option( '-e', '--end-date', dest='end_date',
             help='the exclusive end date for the report period (e.g. 2012-08-26)'),
-        option( '-f', '--force', dest='force', const=True, action='store_const',
+        option( '-F', '--force', dest='force', const=True, action='store_const',
             help='overwrite output file if it exists' ),
         ]
 
@@ -54,6 +58,9 @@ class GenerateReport(EucaDatawarehouse):
         if options.type is not None:
             command.append( '-t' )
             command.append( options.type )
+        if options.format is not None:
+            command.append( '-f' )
+            command.append( options.format )
         if options.start_date is not None:
             command.append( '-s' )
             command.append( self.timestamp( options.start_date ) )
@@ -61,7 +68,7 @@ class GenerateReport(EucaDatawarehouse):
             command.append( '-e' )
             command.append( self.timestamp( options.end_date ) )
         if filename is not None:
-            command.append( '-f' )
+            command.append( '-r' )
             command.append( filename )
 
         self.run_java_command( options, 'ReportCommand', command )
