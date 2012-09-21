@@ -11,6 +11,9 @@ core.*
 *.pyo
 *.class
 
+# Build Output #
+/build/
+
 # Package Files #
 *.jar
 *.war
