@@ -19,12 +19,6 @@
         <mkdir dir="${build.classes.dir}" />
         <mkdir dir="${dist.dir}" />
         <mkdir dir="${lib.dir}" />
-        <!-- Build task jar for Linux distribution discovery -->
-        <ant dir="ant-linuxtools" target="jar" />
-        <available file="${dist.dir}/linuxtools.jar"
-            property="linuxtools.exists" />
-        <fail message="Missing linuxtools tasks jar"
-            unless="linuxtools.exists" />
 
         <!-- clean classes files from ant-linuxtools -->
         <delete dir="${build.classes.dir}" />
@@ -34,7 +28,7 @@
     <target name="resolve" depends="init">
         <taskdef uri="antlib:org.eucalyptus.tasks.linuxtools"
             resource="org/eucalyptus/tasks/linuxtools/antlib.xml"
-            classpath="${dist.dir}/linuxtools.jar" />
+            classpath="/usr/share/java/ant-linuxtools.jar" />
 
         <taskdef uri="antlib:org.apache.ivy.ant"
             classpath="/usr/share/java/ivy.jar" />
