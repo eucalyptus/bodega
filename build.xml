@@ -48,7 +48,7 @@
         <javac srcdir="src" destdir="${build.classes.dir}"
             includeantruntime="true" classpathref="classpath.ref"/>
         <copy todir="${build.classes.dir}">
-            <fileset dir="src" includes="**/*.xml,**/*.properties"/>
+            <fileset dir="src/main/resources" includes="**/*.xml,**/*.properties"/>
         </copy>
     </target>
 
