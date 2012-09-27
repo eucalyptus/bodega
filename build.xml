@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <project xmlns:ivy="antlib:org.apache.ivy.ant"
     xmlns:linuxtools="antlib:org.eucalyptus.tasks.linuxtools"
-    name="bodega" default="default">
+    name="eucadw" default="default">
 
     <property name="build.dir" location="build" />
     <property name="build.classes.dir"
         location="${build.dir}/classes" />
     <property name="dist.dir" location="dist" />
     <property name="lib.dir" location="lib" />
-    <property name="bodega.version" value="0.01" />
-    <property name="bodega.jar" value="${dist.dir}/bodega.jar"/>
+    <property name="eucadw.version" value="3.2.0" />
+    <property name="eucadw.jar" value="${dist.dir}/eucalyptus-datawarehouse-${eucadw.version}.jar"/>
     <path id="classpath.ref">
         <fileset dir="lib" includes="**/*.jar"/>
     </path>
@@ -19,10 +19,6 @@
         <mkdir dir="${build.classes.dir}" />
         <mkdir dir="${dist.dir}" />
         <mkdir dir="${lib.dir}" />
-
-        <!-- clean classes files from ant-linuxtools -->
-        <delete dir="${build.classes.dir}" />
-        <mkdir dir="${build.classes.dir}" />
     </target>
 
     <target name="resolve" depends="init">
@@ -46,7 +42,6 @@
         <delete dir="${build.classes.dir}" />
         <delete dir="${dist.dir}" />
         <delete dir="${lib.dir}" />
-        <ant dir="ant-linuxtools" target="clean" />
     </target>
 
     <target name="compile" depends="init,resolve">
@@ -58,7 +53,7 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar destfile="${bodega.jar}">
+        <jar destfile="${eucadw.jar}">
             <fileset dir="${build.classes.dir}" includes="**/*" />
         </jar>
     </target>
