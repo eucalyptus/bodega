@@ -193,6 +193,9 @@
         <dependency org="javassist"
             name="${javassist.name}"
             rev="${javassist.version}"/>
+        <dependency org="org.jgroups"
+            name="${jgroups.name}"
+            rev="${jgroups.version}"/>
         <dependency org="org.postgresql"
             name="${jdbc.name}"
             rev="${jdbc.version}"/>
