@@ -53,6 +53,7 @@ class build_scripts_with_path_headers(build_scripts):
 admin_scripts = [
     "bin/eucadw-generate-report",
     "bin/eucadw-import-data",
+    "bin/eucadw-status",
                 ]
 
 setup(name="eucadw",

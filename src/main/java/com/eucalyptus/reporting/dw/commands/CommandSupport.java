@@ -49,6 +49,7 @@ abstract class CommandSupport {
   private static final String LOGGING_THRESHOLD_DEBUG = Level.DEBUG.toString();
 
   private final Arguments arguments;
+  private DatabaseConnectionInfo databaseConnectionInfo;
 
   public CommandSupport( final Arguments arguments ) {
     this.arguments = arguments;
@@ -59,13 +60,21 @@ abstract class CommandSupport {
       setupLogging();
       setupPersistenceContext();
       runCommand( arguments );
-    } catch ( Exception e ) {
-      Logger.getLogger( this.getClass() ).error( "Error processing command", e );
-      System.exit(1);
+    } catch ( final Throwable e ) {
+      handleCommandError( e );
     }
   }
 
   protected abstract void runCommand( Arguments arguments );
+
+  protected void handleCommandError( final Throwable e ) {
+    Logger.getLogger( this.getClass() ).error( "Error processing command", e );
+    System.exit(1);
+  }
+
+  protected DatabaseConnectionInfo getDatabaseConnectionInfo() {
+    return databaseConnectionInfo;
+  }
 
   private void setupLogging() {
     final String threshold = arguments.getArgument( "log-threshold", null );
@@ -90,14 +99,22 @@ abstract class CommandSupport {
       throw Exceptions.toUndeclared(e);
     }
 
+    databaseConnectionInfo = new DatabaseConnectionInfo(
+        arguments.getArgument( "db-host", "localhost" ) ,
+        arguments.getArgument( "db-port", "5432" ),
+        arguments.getArgument( "db-name", "eucalyptus_reporting" ),
+        arguments.getArgument( "db-user", "eucalyptus" ),
+        arguments.getArgument( "db-pass", "" )
+    );
+
     properties.setProperty( "jdbc-0.proxool.driver-url",
         String.format( "jdbc:postgresql://%s:%s/%s%s",
-            arguments.getArgument( "db-host", "localhost") ,
-            arguments.getArgument( "db-port", "5432"),
-            arguments.getArgument( "db-name", "eucalyptus_reporting"),
-            arguments.hasArgument( "db-ssl" ) ? "?ssl=true&sslfactory=com.eucalyptus.postgresql.PostgreSQLSSLSocketFactory" : "") );
-    properties.setProperty( "jdbc-0.user", arguments.getArgument( "db-user", "eucalyptus" ) );
-    properties.setProperty( "jdbc-0.password", arguments.getArgument("db-pass", "") );
+            databaseConnectionInfo.getHost(),
+            databaseConnectionInfo.getPort(),
+            databaseConnectionInfo.getName(),
+            arguments.hasArgument( "db-ssl" ) ? "?ssl=true&sslfactory=com.eucalyptus.postgresql.PostgreSQLSSLSocketFactory" : "" ) );
+    properties.setProperty( "jdbc-0.user", databaseConnectionInfo.getUser() );
+    properties.setProperty( "jdbc-0.password", databaseConnectionInfo.getPass() );
 
     try {
       PropertyConfigurator.configure( properties );
@@ -135,6 +152,46 @@ abstract class CommandSupport {
 
     boolean hasArgument( final String name ) {
       return commandLine.hasOption( name );
+    }
+  }
+
+  static final class DatabaseConnectionInfo {
+    private final String host;
+    private final String port;
+    private final String name;
+    private final String user;
+    private final String pass;
+
+    DatabaseConnectionInfo( final String host,
+                            final String port,
+                            final String name,
+                            final String user,
+                            final String pass ) {
+      this.host = host;
+      this.port = port;
+      this.name = name;
+      this.user = user;
+      this.pass = pass;
+    }
+
+    public String getHost() {
+      return host;
+    }
+
+    public String getPort() {
+      return port;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getUser() {
+      return user;
+    }
+
+    public String getPass() {
+      return pass;
     }
   }
 
