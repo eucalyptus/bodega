@@ -20,7 +20,6 @@
 package com.eucalyptus.reporting.dw.commands;
 
 import java.io.File;
-import java.io.IOException;
 import com.eucalyptus.reporting.export.Import;
 import com.eucalyptus.reporting.export.ReportingExport;
 import com.eucalyptus.util.Exceptions;
@@ -42,19 +41,21 @@ public class ImportCommand extends CommandSupport {
     final boolean replace = arguments.hasArgument( "replace" );
     final String exportFilename = arguments.getArgument( "file", null );
     final File exportFile = new File( exportFilename );
-    final ReportingExport reportingExport;
 
     try {
-      reportingExport = new ReportingExport( exportFile );
-    } catch ( IOException e ) {
+      final ReportingExport export = Import.importData( exportFile, new Runnable(){
+        @Override
+        public void run() {
+          if ( replace ) {
+            Import.deleteAll();
+          }
+        }
+      } );
+
+      //TODO:STEVE: log information about the imported data here
+    } catch ( Exception e ) {
       throw Exceptions.toUndeclared( e );
     }
-
-    if ( replace ) {
-      Import.deleteAll();
-    }
-
-    Import.importData( reportingExport );
   }
 
   public static void main( final String[] args ) {
