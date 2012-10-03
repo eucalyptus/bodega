@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!--
+  Copyright 2009-2012 Eucalyptus Systems, Inc.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; version 3 of the License.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see http://www.gnu.org/licenses/.
+
+  Please contact Eucalyptus Systems, Inc., 6755 Hollister Ave., Goleta
+  CA 93117, USA or visit http://www.eucalyptus.com/licenses/ if you need
+  additional information or have any questions.
+  -->
+<xsd:schema targetNamespace="http://www.eucalyptus.com/ns/reporting/export/2012-08-24/" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:rex="http://www.eucalyptus.com/ns/reporting/export/2012-08-24/" 
+elementFormDefault="qualified">
+
+  <xsd:element name="Export" type="rex:ExportType"/>
+
+  <xsd:complexType name="ExportType">
+    <xsd:sequence>
+      <xsd:element name="UsageBag" type="rex:UsageBagType"/>
+      <xsd:element name="EventBag" type="rex:EventBagType"/>
+      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:anyAttribute namespace="##other" processContents="lax"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="UsageBagType">
+    <xsd:sequence>
+      <xsd:element name="Usage" type="rex:UsageType" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:anyAttribute namespace="##other" processContents="lax"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="EventBagType">
+    <xsd:sequence>
+      <xsd:element name="Event" type="rex:EventType" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:anyAttribute namespace="##other" processContents="lax"/>
+  </xsd:complexType>
+
+  <xsd:attributeGroup name="ItemAttributes">
+    <xsd:attribute name="Id" type="xsd:string" use="required"/>
+    <xsd:attribute name="Created" type="xsd:dateTime" use="required"/>
+    <xsd:attribute name="Occurred" type="xsd:dateTime" use="required"/>
+    <xsd:attribute name="Type" type="xsd:string" use="required"/>
+    <xsd:attribute name="TargetId" type="xsd:string" use="required"/>
+  </xsd:attributeGroup>
+
+  <xsd:attributeGroup name="IdentityAttributes">
+    <xsd:attribute name="AccountId" type="xsd:string"/>
+    <xsd:attribute name="AccountName" type="xsd:string"/>
+    <xsd:attribute name="UserId" type="xsd:string"/>
+    <xsd:attribute name="UserName" type="xsd:string"/>
+  </xsd:attributeGroup>
+
+  <xsd:complexType name="UsageType">
+    <xsd:attributeGroup ref="rex:ItemAttributes"/>
+    <xsd:attribute name="Metric" type="xsd:string" use="required"/>
+    <xsd:attribute name="Dimension" type="xsd:string"/>
+    <xsd:attribute name="Sequence" type="xsd:long"/>
+    <xsd:attribute name="Value" type="xsd:double" use="required"/>
+    <xsd:anyAttribute namespace="##other" processContents="lax"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="EventType">
+    <xsd:attributeGroup ref="rex:ItemAttributes"/>
+    <xsd:attributeGroup ref="rex:IdentityAttributes"/>
+    <xsd:attribute name="Action" type="xsd:string" use="required"/>
+    <xsd:attribute name="TargetName" type="xsd:string"/>
+    <xsd:attribute name="Version" type="xsd:string"/>
+    <xsd:attribute name="Subtype" type="xsd:string"/>
+    <xsd:attribute name="InstanceUuid" type="xsd:string"/>
+    <xsd:attribute name="VolumeUuid" type="xsd:string"/>
+    <xsd:attribute name="Scope" type="xsd:string"/>
+    <xsd:attribute name="Size" type="xsd:long"/>
+    <xsd:anyAttribute namespace="##other" processContents="lax"/>
+  </xsd:complexType>
+
+</xsd:schema>
+
