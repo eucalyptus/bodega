@@ -6,6 +6,10 @@
     <property name="build.dir" location="build" />
     <property name="build.classes.dir"
         location="${build.dir}/classes" />
+    <property name="build.reporting.dir"
+              location="${build.dir}/reporting" />
+    <property name="build.reporting.classes.dir"
+              location="${build.reporting.dir}/classes" />
     <property name="dist.dir" location="dist" />
     <property name="lib.dir" location="lib" />
     <property name="eucadw.version" value="3.2.0" />
@@ -17,29 +21,38 @@
     <target name="init">
         <!-- Prepare directories -->
         <mkdir dir="${build.classes.dir}" />
+        <mkdir dir="${build.reporting.dir}" />
+        <mkdir dir="${build.reporting.classes.dir}" />
         <mkdir dir="${dist.dir}" />
         <mkdir dir="${lib.dir}" />
     </target>
 
-    <target name="resolve" depends="init">
+    <target name="detect-os" unless="distro.name">
         <taskdef uri="antlib:org.eucalyptus.tasks.linuxtools"
-            resource="org/eucalyptus/tasks/linuxtools/antlib.xml"
-            classpath="/usr/share/java/ant-linuxtools.jar" />
-
-        <taskdef uri="antlib:org.apache.ivy.ant"
-            classpath="/usr/share/java/ivy.jar" />
+                 resource="org/eucalyptus/tasks/linuxtools/antlib.xml"
+                 classpath="/usr/share/java/ant-linuxtools.jar" />
 
         <linuxtools:detectdistro />
-        <condition property="distro.name" else="default">
-            <isset property="distro.name" />
-        </condition>
+
+        <!-- Set to default if not detected -->
+        <property name="distro.name" value="default"/>
+    </target>
+
+    <target name="ivy-init" depends="init, detect-os">
+
+        <taskdef uri="antlib:org.apache.ivy.ant"
+                 classpath="/usr/share/java/ivy.jar" />
+
         <property file="settings/${distro.name}.properties" />
         <ivy:settings file="settings/${distro.name}.xml" />
+    </target>
+
+    <target name="resolve" depends="ivy-init">
         <ivy:retrieve />
     </target>
 
     <target name="clean">
-        <delete dir="${build.classes.dir}" />
+        <delete dir="${build.dir}" />
         <delete dir="${dist.dir}" />
         <delete dir="${lib.dir}" />
     </target>
@@ -55,6 +68,37 @@
     <target name="jar" depends="compile">
         <jar destfile="${eucadw.jar}">
             <fileset dir="${build.classes.dir}" includes="**/*" />
+        </jar>
+    </target>
+
+    <!--
+      Eucalyptus build does not compile the bindings for the reporting
+      data export, we rebuild the JAR here to avoid complexity at 
+      runtime.
+    -->
+    <target name="reporting-binding" depends="ivy-init">
+        <taskdef name="bind" classname="org.jibx.binding.ant.CompileTask">
+            <classpath refid="classpath.ref"/>
+        </taskdef>
+
+        <ivy:retrieve
+            inline="true"
+            organisation="org.eucalyptus"
+            module="eucalyptus-reporting"
+            revision="3.2.0"
+            type="jar"
+            transitive="false"
+            pattern="${build.reporting.dir}/[module].[ext]"
+            overwriteMode="always"/>
+
+        <unjar src="${build.reporting.dir}/eucalyptus-reporting.jar" dest="${build.reporting.classes.dir}"/>
+
+        <bind verbose="true" load="true" binding="${build.reporting.classes.dir}/reporting-data-export-binding.xml">
+            <classpath path="${build.reporting.classes.dir}"/>
+        </bind>
+
+        <jar destfile="${build.reporting.dir}/eucalyptus-reporting-3.2.0.jar">
+            <fileset dir="${build.reporting.classes.dir}"/>
         </jar>
     </target>
 
