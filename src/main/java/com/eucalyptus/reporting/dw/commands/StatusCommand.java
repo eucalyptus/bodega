@@ -55,7 +55,7 @@ public class StatusCommand extends CommandSupport {
     long maxTime = Long.MIN_VALUE;
     long minTime = Long.MAX_VALUE;
     for ( final Class<? extends ReportingEventSupport> entityClass :
-        Iterables.concat( ExportUtils.getEventClasses()/*, ExportUtils.getUsageClasses()*/ ) ) { //TODO:STEVE:uncomment when available
+        Iterables.concat( ExportUtils.getEventClasses(), ExportUtils.getUsageClasses() ) ) {
       final EntityTransaction transaction = Entities.get( entityClass );
       try {
         maxTime = Math.max( timestamp( entityClass, MAX, Long.MIN_VALUE ), maxTime );
@@ -74,21 +74,6 @@ public class StatusCommand extends CommandSupport {
     }
   }
 
-  @Override
-  protected void handleCommandError( final Throwable e ) {
-    if ( e instanceof PersistenceException ) {
-      if ( Exceptions.isCausedBy( e, SQLException.class ) ) {
-        final SQLException sqlException = Exceptions.findCause( e, SQLException.class );
-        System.out.println( "Database access failed with the following details." );
-        System.out.println( "SQLState  : " + sqlException.getSQLState() );
-        System.out.println( "Error Code: " + sqlException.getErrorCode() );
-        System.out.println( sqlException.getMessage() );
-        return;
-      }
-    }
-    super.handleCommandError( e );
-  }
-
   private long timestamp( final Class<? extends ReportingEventSupport> entityClass,
                           final Projection projection,
                           final long defaultValue ) {
@@ -99,11 +84,6 @@ public class StatusCommand extends CommandSupport {
         .setProjection(projection)
         .uniqueResult();
     return value == null ? defaultValue : value.longValue();
-  }
-
-  private String format( final long timestamp ) {
-    final SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
-    return sdf.format( new Date( timestamp ) );
   }
 
   public static void main( final String[] args ) {

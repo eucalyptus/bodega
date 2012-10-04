@@ -22,15 +22,15 @@ from eucadw import EucaDatawarehouse
 class ImportData(EucaDatawarehouse):
 
     options = [
-        option( '-f', '--file', dest="filename",
-            help='Export file for importing' ),
+        option( '-e', '--export', dest="filename",
+            metavar='EXPORT', help='Export file for importing' ),
         option( '-r', '--replace', dest='replace', action='store_true',
             help='Replace existing data'),
         ]
 
     def command( self, parser, options, args ):
         if options.filename is None:
-            parser.error( 'file is required' )
+            options.filename = '/dev/stdin'
 
         command = [ ]
         if options.replace:

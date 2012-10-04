@@ -20,8 +20,12 @@
 package com.eucalyptus.reporting.dw.commands;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import javax.persistence.PersistenceException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;
@@ -68,12 +72,29 @@ abstract class CommandSupport {
   protected abstract void runCommand( Arguments arguments );
 
   protected void handleCommandError( final Throwable e ) {
+    if ( e instanceof PersistenceException ) {
+      if ( Exceptions.isCausedBy( e, SQLException.class ) ) {
+        final SQLException sqlException = Exceptions.findCause( e, SQLException.class );
+        System.out.println( "Database access failed with the following details." );
+        System.out.println( "SQLState  : " + sqlException.getSQLState() );
+        System.out.println( "Error Code: " + sqlException.getErrorCode() );
+        System.out.println( sqlException.getMessage() );
+        return;
+      }
+    }
+
+    System.out.print( "Error processing command: " + e.getMessage() );
     Logger.getLogger( this.getClass() ).error( "Error processing command", e );
     System.exit(1);
   }
 
   protected DatabaseConnectionInfo getDatabaseConnectionInfo() {
     return databaseConnectionInfo;
+  }
+
+  protected static String format( final long timestamp ) {
+    final SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+    return sdf.format( new Date( timestamp ) );
   }
 
   private void setupLogging() {

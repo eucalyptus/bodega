@@ -21,7 +21,6 @@ package com.eucalyptus.reporting.dw.commands;
 
 import java.io.File;
 import com.eucalyptus.reporting.export.Import;
-import com.eucalyptus.reporting.export.ReportingExport;
 import com.eucalyptus.util.Exceptions;
 
 /**
@@ -43,7 +42,7 @@ public class ImportCommand extends CommandSupport {
     final File exportFile = new File( exportFilename );
 
     try {
-      final ReportingExport export = Import.importData( exportFile, new Runnable(){
+      final Import.ImportResult result = Import.importData( exportFile, new Runnable(){
         @Override
         public void run() {
           if ( replace ) {
@@ -52,7 +51,13 @@ public class ImportCommand extends CommandSupport {
         }
       } );
 
-      //TODO:STEVE: log information about the imported data here
+      if ( result.getItems() == 0 ) {
+        System.out.println( "No data imported." );
+      } else {
+        System.out.println( "Imported " + result.getItems()
+            + " entries from " + format( result.getMinTimestamp() )
+            + " to " + format( result.getMaxTimestamp() ) );
+      }
     } catch ( Exception e ) {
       throw Exceptions.toUndeclared( e );
     }

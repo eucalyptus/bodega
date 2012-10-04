@@ -53,7 +53,8 @@ class EucaDatawarehouse():
         common_group.add_option("-C", "--config-file", dest="config_file", help="Load configuration from the specified file")
         common_group.add_option("-I", "--config-ignore", dest="config_ignore", action="store_true", help="Ignore configuration files unless explicitly specified")
         common_group.add_option("-D", "--debug", dest="logging_debug", action="store_true", help="Enable debug logging")
-        common_group.add_option("-S", "--silent", dest="logging_silent", action="store_true", help="Suppress logging output")
+        common_group.add_option("-E", "--errors", dest="logging_error", action="store_true", help="Enable error logging")
+        common_group.add_option("-J", "--jvm", dest="jvm_options", action="append", help="Options passed to Java VM")
         return common_group
 
     def add_config_defaults( self, options ):
@@ -75,8 +76,10 @@ class EucaDatawarehouse():
         return options
 
     def get_java_command( self, options, command_class ):
-        #TODO determine / detect correct install location for JAR files
-        command = [ 'java', '-cp', '/usr/share/java/eucadw/*', 'com.eucalyptus.reporting.dw.commands.' + command_class ]
+        command = [ 'java' ]
+        if options.jvm_options:
+            command += options.jvm_options
+        command += [ '-cp', '/usr/share/java/eucadw/*', 'com.eucalyptus.reporting.dw.commands.' + command_class ]
         command.append( '-dbh' )
         command.append( options.db_host )
         command.append( '-dbpo' )
@@ -89,17 +92,17 @@ class EucaDatawarehouse():
         command.append( options.db_pass )
         if options.db_ssl:
             command.append( '-dbs' )
-        if options.logging_silent:
-            command.append( '-lt' )
-            command.append( 'silent' )
-        elif options.logging_debug:
+        if options.logging_debug:
             command.append( '-lt' )
             command.append( 'debug' )
+        elif not options.logging_error:
+            command.append( '-lt' )
+            command.append( 'silent' )
         return command
 
     def run_java_command( self, options, command_class, command_args ):
         command = self.get_java_command( options, command_class )
-        command = command + command_args
+        command += command_args
         status = subprocess.call( command )
         if status is not 0:
             sys.exit( status )
