@@ -39,7 +39,6 @@
     </target>
 
     <target name="ivy-init" depends="init, detect-os">
-
         <taskdef uri="antlib:org.apache.ivy.ant"
                  classpath="/usr/share/java/ivy.jar" />
 
@@ -57,7 +56,7 @@
         <delete dir="${lib.dir}" />
     </target>
 
-    <target name="compile" depends="init,resolve">
+    <target name="compile" depends="init,resolve,reporting-binding">
         <javac srcdir="src" destdir="${build.classes.dir}"
             includeantruntime="true" classpathref="classpath.ref"/>
         <copy todir="${build.classes.dir}">
@@ -88,8 +87,7 @@
             revision="3.2.0"
             type="jar"
             transitive="false"
-            pattern="${build.reporting.dir}/[module].[ext]"
-            overwriteMode="always"/>
+            pattern="${build.reporting.dir}/[module].[ext]"/>
 
         <unjar src="${build.reporting.dir}/eucalyptus-reporting.jar" dest="${build.reporting.classes.dir}"/>
 
@@ -97,7 +95,7 @@
             <classpath path="${build.reporting.classes.dir}"/>
         </bind>
 
-        <jar destfile="${build.reporting.dir}/eucalyptus-reporting-3.2.0.jar">
+        <jar destfile="${lib.dir}/eucalyptus-reporting-dw-3.2.0.jar">
             <fileset dir="${build.reporting.classes.dir}"/>
         </jar>
     </target>

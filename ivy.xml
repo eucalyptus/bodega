@@ -136,6 +136,9 @@
         <dependency org="jibx-schema"
             name="${jibx.schema.name}"
             rev="${jibx.version}"/>
+        <dependency org="jibx-tools"
+            name="${jibx.tools.name}"
+            rev="${jibx.version}"/>
         <dependency org="junit"
             name="${junit.name}"
             rev="${junit.version}"/>
@@ -202,11 +205,11 @@
         <dependency org="org.logicalcobwebs.cglib"
             name="${proxool-cglib.name}"
             rev="${proxool-cglib.version}"/>
+        <dependency org="org.jboss.netty"
+            name="${netty.name}"
+            rev="${netty.version}"/>
         <dependency org="org.eucalyptus"
             name="eucalyptus-msgs"
-            rev="3.2.0"/>
-        <dependency org="org.eucalyptus"
-            name="eucalyptus-reporting"
             rev="3.2.0"/>
     </dependencies>
 </ivy-module>
