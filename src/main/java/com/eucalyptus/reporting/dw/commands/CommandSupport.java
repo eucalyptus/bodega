@@ -72,15 +72,14 @@ abstract class CommandSupport {
   protected abstract void runCommand( Arguments arguments );
 
   protected void handleCommandError( final Throwable e ) {
-    if ( e instanceof PersistenceException ) {
-      if ( Exceptions.isCausedBy( e, SQLException.class ) ) {
-        final SQLException sqlException = Exceptions.findCause( e, SQLException.class );
-        System.out.println( "Database access failed with the following details." );
-        System.out.println( "SQLState  : " + sqlException.getSQLState() );
-        System.out.println( "Error Code: " + sqlException.getErrorCode() );
-        System.out.println( sqlException.getMessage() );
-        return;
-      }
+    if ( Exceptions.isCausedBy( e, PersistenceException.class ) &&
+        Exceptions.isCausedBy( e, SQLException.class ) ) {
+      final SQLException sqlException = Exceptions.findCause( e, SQLException.class );
+      System.out.println( "Database access failed with the following details." );
+      System.out.println( "SQLState  : " + sqlException.getSQLState() );
+      System.out.println( "Error Code: " + sqlException.getErrorCode() );
+      System.out.println( sqlException.getMessage() );
+      return;
     }
 
     System.out.print( "Error processing command: " + e.getMessage() );

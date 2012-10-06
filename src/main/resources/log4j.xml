@@ -28,6 +28,7 @@
     </appender>
 
     <root>
+        <level value="${com.eucalyptus.reporting.dw.logThreshold}" />
         <appender-ref ref="console" />
     </root>
 
