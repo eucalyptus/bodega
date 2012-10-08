@@ -58,7 +58,7 @@
 
     <target name="compile" depends="init,resolve,reporting-binding">
         <javac srcdir="src" destdir="${build.classes.dir}"
-            includeantruntime="true" classpathref="classpath.ref"/>
+            includeantruntime="true" classpathref="classpath.ref" debug="true"/>
         <copy todir="${build.classes.dir}">
             <fileset dir="src/main/resources" includes="**/*.xml,**/*.properties"/>
         </copy>
