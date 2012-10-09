@@ -32,7 +32,7 @@ class EucaDatawarehouse():
         'db_port': '5432',
         'db_name': 'eucalyptus_reporting',
         'db_user': 'eucalyptus',
-        'db_pass': '',
+        'db_pass': None,
         'db_ssl': False
         }
 
@@ -88,8 +88,6 @@ class EucaDatawarehouse():
         command.append( options.db_name )
         command.append( '-dbu' )
         command.append( options.db_user )
-        command.append( '-dbp' )
-        command.append( options.db_pass )
         if options.db_ssl:
             command.append( '-dbs' )
         if options.logging_debug:
@@ -103,9 +101,13 @@ class EucaDatawarehouse():
     def run_java_command( self, options, command_class, command_args ):
         command = self.get_java_command( options, command_class )
         command += command_args
-        status = subprocess.call( command )
-        if status is not 0:
-            sys.exit( status )
+        java_env = os.environ.copy()
+        if options.db_pass is not None:
+            java_env[ 'EUCADW_DB_PASS' ] = options.db_pass
+        popen = subprocess.Popen( command, env=java_env )
+        popen.wait()
+        if popen.returncode is not 0:
+            sys.exit( popen.returncode )
 
     def command( self, parser, options, args ):
         pass
@@ -120,6 +122,8 @@ class EucaDatawarehouse():
             self.command( parser, options, args )
         except IOError as e:
             sys.exit(e)
+        except KeyboardInterrupt as k:
+            sys.exit(k)
 
 
 

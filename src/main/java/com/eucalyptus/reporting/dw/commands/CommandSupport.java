@@ -72,17 +72,23 @@ abstract class CommandSupport {
   protected abstract void runCommand( Arguments arguments );
 
   protected void handleCommandError( final Throwable e ) {
-    if ( Exceptions.isCausedBy( e, PersistenceException.class ) &&
-        Exceptions.isCausedBy( e, SQLException.class ) ) {
-      final SQLException sqlException = Exceptions.findCause( e, SQLException.class );
-      System.out.println( "Database access failed with the following details." );
-      System.out.println( "SQLState  : " + sqlException.getSQLState() );
-      System.out.println( "Error Code: " + sqlException.getErrorCode() );
-      System.out.println( sqlException.getMessage() );
+    if ( e instanceof ConfigurationException ) {
+      System.err.println( "Missing or invalid configuration." );
+      System.err.println( e.getMessage() );
       return;
     }
 
-    System.out.print( "Error processing command: " + e.getMessage() );
+    if ( Exceptions.isCausedBy( e, PersistenceException.class ) &&
+        Exceptions.isCausedBy( e, SQLException.class ) ) {
+      final SQLException sqlException = Exceptions.findCause( e, SQLException.class );
+      System.err.println( "Database access failed with the following details." );
+      System.err.println( "SQLState  : " + sqlException.getSQLState() );
+      System.err.println( "Error Code: " + sqlException.getErrorCode() );
+      System.err.println( sqlException.getMessage() );
+      return;
+    }
+
+    System.err.print( "Error processing command: " + e.getMessage() );
     Logger.getLogger( this.getClass() ).error( "Error processing command", e );
     System.exit(1);
   }
@@ -119,12 +125,22 @@ abstract class CommandSupport {
       throw Exceptions.toUndeclared(e);
     }
 
+    String dbPassword = System.getenv( "EUCADW_DB_PASS" );
+    dbPassword = arguments.getArgument( "db-pass", dbPassword );
+    if ( dbPassword == null && System.console() != null ) {
+      char[] password = System.console().readPassword( "Database password: " );
+      dbPassword = password != null ? new String( password ) : "";
+    }
+    if ( dbPassword == null ) {
+      throw new ConfigurationException( "Database password not provided." );
+    }
+
     databaseConnectionInfo = new DatabaseConnectionInfo(
         arguments.getArgument( "db-host", "localhost" ) ,
         arguments.getArgument( "db-port", "5432" ),
         arguments.getArgument( "db-name", "eucalyptus_reporting" ),
         arguments.getArgument( "db-user", "eucalyptus" ),
-        arguments.getArgument( "db-pass", "" )
+        dbPassword
     );
 
     properties.setProperty( "jdbc-0.proxool.driver-url",
@@ -224,7 +240,7 @@ abstract class CommandSupport {
       withArg( "dbpo", "db-port", "Database port", false );
       withArg( "dbn",  "db-name", "Database name", false );
       withArg( "dbu",  "db-user", "Database username", false );
-      withArg( "dbp",  "db-pass", "Database password", true );
+      withArg( "dbp",  "db-pass", "Database password", false );
       withFlag( "dbs", "db-ssl", "Database connection uses SSL" );
 
       // Logging arguments
@@ -259,6 +275,12 @@ abstract class CommandSupport {
       } catch (ParseException e) {
         throw new IllegalArgumentException( e );
       }
+    }
+  }
+
+  static final class ConfigurationException extends RuntimeException {
+    public ConfigurationException( final String message ) {
+      super( message );
     }
   }
 }
