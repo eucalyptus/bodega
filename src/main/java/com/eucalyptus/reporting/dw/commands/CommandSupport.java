@@ -40,6 +40,7 @@ import com.eucalyptus.entities.PersistenceContexts;
 import com.eucalyptus.reporting.export.ExportUtils;
 import com.eucalyptus.util.Exceptions;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -48,9 +49,14 @@ import com.google.common.collect.Lists;
  */
 abstract class CommandSupport {
   private static final String PROP_LOGGING_THRESHOLD = "com.eucalyptus.reporting.dw.logThreshold";
+  private static final String PROP_EUCA_LOGGING_THRESHOLD = "euca.log.level";
   private static final String LOGGING_THRESHOLD_DEFAULT = Level.ERROR.toString();
   private static final String LOGGING_THRESHOLD_SILENT = Level.OFF.toString();
   private static final String LOGGING_THRESHOLD_DEBUG = Level.DEBUG.toString();
+  private static final String RESOURCE_DATA_WAREHOUSE_PERSISTENCE_PROPERTIES =
+      "com/eucalyptus/reporting/dw/datawarehouse_persistence.properties";
+  private static final List<String> EUCA_LOG_LEVELS = ImmutableList.of(
+      "EXHAUST", "EXTREME", "TRACE","DEBUG", "INFO", "WARN", "ERROR", "FATAL" );
 
   private final Arguments arguments;
   private DatabaseConnectionInfo databaseConnectionInfo;
@@ -88,7 +94,7 @@ abstract class CommandSupport {
       return;
     }
 
-    System.err.print( "Error processing command: " + e.getMessage() );
+    System.err.println( "Error processing command: " + e.getMessage() );
     Logger.getLogger( this.getClass() ).error( "Error processing command", e );
     System.exit(1);
   }
@@ -115,12 +121,16 @@ abstract class CommandSupport {
       log4JThreshold = threshold;
     }
     System.setProperty( PROP_LOGGING_THRESHOLD, log4JThreshold );
+    final String eucaThreshold = EUCA_LOG_LEVELS.contains( log4JThreshold ) ?
+        log4JThreshold : "FATAL";
+    System.setProperty( PROP_EUCA_LOGGING_THRESHOLD, eucaThreshold );
   }
 
   private void setupPersistenceContext() {
     final Properties properties = new Properties();
     try {
-      properties.load( CommandSupport.class.getClassLoader().getResourceAsStream("com/eucalyptus/reporting/dw/datawarehouse_persistence.properties" ) );
+      properties.load( CommandSupport.class.getClassLoader()
+          .getResourceAsStream( RESOURCE_DATA_WAREHOUSE_PERSISTENCE_PROPERTIES ) );
     } catch (IOException e) {
       throw Exceptions.toUndeclared(e);
     }
@@ -148,7 +158,9 @@ abstract class CommandSupport {
             databaseConnectionInfo.getHost(),
             databaseConnectionInfo.getPort(),
             databaseConnectionInfo.getName(),
-            arguments.hasArgument( "db-ssl" ) ? "?ssl=true&sslfactory=com.eucalyptus.postgresql.PostgreSQLSSLSocketFactory" : "" ) );
+            arguments.hasArgument( "db-ssl" ) ?
+                "?ssl=true&sslfactory=com.eucalyptus.postgresql.PostgreSQLSSLSocketFactory" :
+                "" ) );
     properties.setProperty( "jdbc-0.user", databaseConnectionInfo.getUser() );
     properties.setProperty( "jdbc-0.password", databaseConnectionInfo.getPass() );
 
@@ -183,7 +195,8 @@ abstract class CommandSupport {
     }
 
     List<String> getArguments( final String name ) {
-      return Lists.newArrayList(Objects.firstNonNull(commandLine.getOptionValues(name), new String[0]));
+      return Lists.newArrayList(
+          Objects.firstNonNull(commandLine.getOptionValues(name), new String[0]));
     }
 
     boolean hasArgument( final String name ) {
@@ -236,7 +249,7 @@ abstract class CommandSupport {
 
     private ArgumentsBuilder() {
       // DB arguments
-      withArg( "dbh",  "db-host", "Database hostname", false );
+      withArg( "dbh", "db-host", "Database hostname", false );
       withArg( "dbpo", "db-port", "Database port", false );
       withArg( "dbn",  "db-name", "Database name", false );
       withArg( "dbu",  "db-user", "Database username", false );
