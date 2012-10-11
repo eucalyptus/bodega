@@ -19,6 +19,7 @@
  ************************************************************************/
 package com.eucalyptus.reporting.dw.commands;
 
+import static com.eucalyptus.reporting.dw.DataWarehouseSSLSocketFactory.CertificateNotTrustedException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -37,6 +38,7 @@ import org.hibernate.ejb.Ejb3Configuration;
 import org.logicalcobwebs.proxool.ProxoolException;
 import org.logicalcobwebs.proxool.configuration.PropertyConfigurator;
 import com.eucalyptus.entities.PersistenceContexts;
+import com.eucalyptus.reporting.dw.DataWarehouseSSLSocketFactory;
 import com.eucalyptus.reporting.export.ExportUtils;
 import com.eucalyptus.util.Exceptions;
 import com.google.common.base.Objects;
@@ -57,6 +59,9 @@ abstract class CommandSupport {
       "com/eucalyptus/reporting/dw/datawarehouse_persistence.properties";
   private static final List<String> EUCA_LOG_LEVELS = ImmutableList.of(
       "EXHAUST", "EXTREME", "TRACE","DEBUG", "INFO", "WARN", "ERROR", "FATAL" );
+
+  private static final String DEFAULT_CIPHER_STRINGS = "RSA+AES:+SHA:!EXPORT:!EXPORT1025:!MD5";
+  private static final String DEFAULT_PROTOCOL = "TLS";
 
   private final Arguments arguments;
   private DatabaseConnectionInfo databaseConnectionInfo;
@@ -81,6 +86,17 @@ abstract class CommandSupport {
     if ( e instanceof ConfigurationException ) {
       System.err.println( "Missing or invalid configuration." );
       System.err.println( e.getMessage() );
+      return;
+    }
+
+    if ( Exceptions.isCausedBy( e, CertificateNotTrustedException.class ) ) {
+      final CertificateNotTrustedException certificateNotTrustedException =
+          Exceptions.findCause( e, CertificateNotTrustedException.class );
+      System.err.println( "Database access failed due to untrusted server certificate." );
+      System.err.println( "Issuer           : " + certificateNotTrustedException.getIssuer() );
+      System.err.println( "Serial           : " + certificateNotTrustedException.getSerialNumber() );
+      System.err.println( "Subject          : " + certificateNotTrustedException.getSubject() );
+      System.err.println( "SHA-1 Fingerprint: " + certificateNotTrustedException.getSha1Fingerprint() );
       return;
     }
 
@@ -153,13 +169,22 @@ abstract class CommandSupport {
         dbPassword
     );
 
+    if ( arguments.hasArgument( "db-ssl" ) ) {
+      DataWarehouseSSLSocketFactory.initialize(
+          arguments.getArgument( "db-ssl-provider", null ),
+          arguments.getArgument( "db-ssl-protocol", DEFAULT_PROTOCOL ),
+          arguments.getArgument( "db-ssl-ciphers", DEFAULT_CIPHER_STRINGS ),
+          arguments.getArgument( "db-ssl-fingerprint", null ),
+          !arguments.hasArgument( "db-ssl-skip-verify" )  );
+    }
+
     properties.setProperty( "jdbc-0.proxool.driver-url",
         String.format( "jdbc:postgresql://%s:%s/%s%s",
             databaseConnectionInfo.getHost(),
             databaseConnectionInfo.getPort(),
             databaseConnectionInfo.getName(),
             arguments.hasArgument( "db-ssl" ) ?
-                "?ssl=true&sslfactory=com.eucalyptus.postgresql.PostgreSQLSSLSocketFactory" :
+                "?ssl=true&sslfactory=com.eucalyptus.reporting.dw.DataWarehouseSSLSocketFactory" :
                 "" ) );
     properties.setProperty( "jdbc-0.user", databaseConnectionInfo.getUser() );
     properties.setProperty( "jdbc-0.password", databaseConnectionInfo.getPass() );
@@ -255,6 +280,11 @@ abstract class CommandSupport {
       withArg( "dbu",  "db-user", "Database username", false );
       withArg( "dbp",  "db-pass", "Database password", false );
       withFlag( "dbs", "db-ssl", "Database connection uses SSL" );
+      withArg( "dbsf",  "db-ssl-fingerprint", "Database SSL trusted SHA-1 fingerprint", false );
+      withArg( "dbsp",  "db-ssl-provider", "Database SSL provider", false );
+      withArg( "dbst",  "db-ssl-protocol", "Database SSL protocol", false );
+      withArg( "dbsc",  "db-ssl-ciphers", "Database SSL ciphers", false );
+      withFlag( "dbsv", "db-ssl-skip-verify", "Database connection does not verify SSL certificate" );
 
       // Logging arguments
       withArg( "lt", "log-threshold", "Logging threshold", false );

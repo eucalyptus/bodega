@@ -18,6 +18,7 @@
 
 import re
 import sys
+import optparse
 import os
 import subprocess
 from ConfigParser import ConfigParser
@@ -45,6 +46,11 @@ class EucaDatawarehouse():
         dbgroup.add_option("-u", "--database-user", dest="db_user", help="Database username")
         dbgroup.add_option("-p", "--database-pass", dest="db_pass", help="Database password")
         dbgroup.add_option("-l", "--database-use-ssl", dest="db_ssl", action="store_true", help="Database connections use SSL")
+        dbgroup.add_option("-i", "--database-ssl-fingerprint", dest="db_ssl_fingerprint", help="Database connection SSL certificate SHA-1 fingerprint")
+        dbgroup.add_option("--database-ssl-provider", dest="db_ssl_provider", help=optparse.SUPPRESS_HELP)
+        dbgroup.add_option("--database-ssl-protocol", dest="db_ssl_protocol", help=optparse.SUPPRESS_HELP)
+        dbgroup.add_option("--database-ssl-ciphers", dest="db_ssl_ciphers", help=optparse.SUPPRESS_HELP)
+        dbgroup.add_option("--database-ssl-skip-verify", dest="db_ssl_skip_verify", action="store_true", help=optparse.SUPPRESS_HELP)
         return dbgroup
 
     def get_common_option_group( self, parser ):
@@ -90,6 +96,20 @@ class EucaDatawarehouse():
         command.append( options.db_user )
         if options.db_ssl:
             command.append( '-dbs' )
+        if options.db_ssl_fingerprint is not None:
+            command.append( '-dbsf' )
+            command.append( options.db_ssl_fingerprint )
+        if options.db_ssl_provider:
+            command.append( '-dbsp' )
+            command.append( options.db_ssl_provider )
+        if options.db_ssl_protocol:
+            command.append( '-dbst' )
+            command.append( options.db_ssl_protocol )
+        if options.db_ssl_ciphers:
+            command.append( '-dbsc' )
+            command.append( options.db_ssl_ciphers )
+        if options.db_ssl_skip_verify:
+            command.append( '-dbsv' )
         if options.logging_debug:
             command.append( '-lt' )
             command.append( 'debug' )
