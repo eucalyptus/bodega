@@ -19,6 +19,7 @@
  ************************************************************************/
 package com.eucalyptus.reporting.dw.commands;
 
+import static com.eucalyptus.reporting.ReportGenerationFacade.ReportGenerationArgumentException;
 import static com.eucalyptus.reporting.ReportGenerationFacade.ReportGenerationException;
 import java.io.File;
 import java.io.IOException;
@@ -57,15 +58,14 @@ public class ReportCommand extends CommandSupport {
     final String end = arguments.getArgument( "end", formatDate(defaultPeriod.getEndingMs()) );
     final String reportFilename = arguments.getArgument( "file", null );
 
-    long startTime = parseDate( start );
-    long endTime = parseDate( end );
-    if ( endTime <= startTime ) {
-      throw new IllegalArgumentException( "Invalid start or end time");
-    }
+    long startTime = parseDate( start, "start" );
+    long endTime = parseDate( end, "end" );
 
     final String reportData;
     try {
       reportData = ReportGenerationFacade.generateReport( type, format, startTime, endTime );
+    } catch ( ReportGenerationArgumentException e ) {
+      throw new ArgumentException( e.getMessage() );
     } catch ( ReportGenerationException e ) {
       throw Exceptions.toUndeclared( e );
     }
@@ -85,11 +85,11 @@ public class ReportCommand extends CommandSupport {
     return getDateFormat(true).format(new Date(time));
   }
 
-  private long parseDate( final String date ) {
+  private long parseDate( final String date, final String description ) {
     try {
       return getDateFormat( date.endsWith("Z") ).parse( date ).getTime();
     } catch (ParseException e) {
-      throw Exceptions.toUndeclared( e );
+      throw new ArgumentException( "Invalid " + description + " date." );
     }
   }
 

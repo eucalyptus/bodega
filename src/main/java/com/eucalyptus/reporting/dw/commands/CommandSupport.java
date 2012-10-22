@@ -89,6 +89,12 @@ abstract class CommandSupport {
       return;
     }
 
+    if ( e instanceof ArgumentException ) {
+      System.err.println( "Missing or invalid arguments." );
+      System.err.println( e.getMessage() );
+      return;
+    }
+
     if ( Exceptions.isCausedBy( e, CertificateNotTrustedException.class ) ) {
       final CertificateNotTrustedException certificateNotTrustedException =
           Exceptions.findCause( e, CertificateNotTrustedException.class );
@@ -323,6 +329,12 @@ abstract class CommandSupport {
 
   static final class ConfigurationException extends RuntimeException {
     public ConfigurationException( final String message ) {
+      super( message );
+    }
+  }
+
+  static final class ArgumentException extends RuntimeException {
+    public ArgumentException( final String message ) {
       super( message );
     }
   }
