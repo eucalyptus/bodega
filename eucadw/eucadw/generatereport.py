@@ -35,6 +35,18 @@ class GenerateReport(EucaDatawarehouse):
             help='the inclusive start date for the report period (e.g. 2012-08-19)'),
         option( '-e', '--end-date', dest='end_date',
             help='the exclusive end date for the report period (e.g. 2012-08-26)'),
+        option( '--time-unit', dest='time_unit', type='choice',
+            choices=['seconds', 'minutes', 'hours', 'days'],
+            help='the time unit to use in reports'),
+        option( '--size-unit', dest='size_unit', type='choice',
+            choices=['b', 'kb', 'mb', 'gb'],
+            help='the size unit to use in reports'),
+        option( '--size-time-time-unit', dest='size_time_time_unit', type='choice',
+            choices=['seconds', 'minutes', 'hours', 'days'],
+            help='the time unit to use in reports'),
+        option( '--size-time-size-unit', dest='size_time_size_unit', type='choice',
+            choices=['b', 'kb', 'mb', 'gb'],
+            help='the size unit to use in reports'),
         option( '-F', '--force', dest='force', const=True, action='store_const',
             help='overwrite output file if it exists' ),
         ]
@@ -67,6 +79,18 @@ class GenerateReport(EucaDatawarehouse):
         if options.end_date is not None:
             command.append( '-e' )
             command.append( self.timestamp( options.end_date ) )
+        if options.time_unit is not None:
+            command.append( '-tu' )
+            command.append( options.time_unit )
+        if options.size_unit is not None:
+            command.append( '-su' )
+            command.append( options.size_unit )
+        if options.size_time_time_unit is not None:
+            command.append( '-sttu' )
+            command.append( options.size_time_time_unit )
+        if options.size_time_size_unit is not None:
+            command.append( '-stsu' )
+            command.append( options.size_time_size_unit )
         if filename is not None:
             command.append( '-r' )
             command.append( filename )

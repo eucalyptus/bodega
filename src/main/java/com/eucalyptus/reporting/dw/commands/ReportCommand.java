@@ -30,8 +30,12 @@ import java.util.Date;
 import java.util.TimeZone;
 import com.eucalyptus.reporting.Period;
 import com.eucalyptus.reporting.ReportGenerationFacade;
+import com.eucalyptus.reporting.units.SizeUnit;
+import com.eucalyptus.reporting.units.TimeUnit;
+import com.eucalyptus.reporting.units.Units;
 import com.eucalyptus.util.Exceptions;
 import com.google.common.base.Charsets;
+import com.google.common.base.Objects;
 import com.google.common.io.Files;
 
 /**
@@ -40,13 +44,17 @@ import com.google.common.io.Files;
 public class ReportCommand extends CommandSupport {
 
   public ReportCommand(final String[] args) {
-    super(argumentsBuilder()
-        .withArg("t", "type", "The type for the generated report", false)
-        .withArg("f", "format", "The format for the generated report", false)
-        .withArg("s", "start", "The inclusive start time for the report period (e.g. 2012-08-19T00:00:00)", false)
-        .withArg("e", "end", "The exclusive end time for the report period (e.g. 2012-08-26T00:00:00)", false)
+    super( argumentsBuilder()
+        .withArg( "t", "type", "The type for the generated report", false )
+        .withArg( "f", "format", "The format for the generated report", false )
+        .withArg( "s", "start", "The inclusive start time for the report period (e.g. 2012-08-19T00:00:00)", false )
+        .withArg( "e", "end", "The exclusive end time for the report period (e.g. 2012-08-26T00:00:00)", false )
+        .withArg( "tu", "time-unit", "The time unit to use for reports", false )
+        .withArg( "su", "size-unit", "The size unit to use for reports", false )
+        .withArg( "sttu", "size-time-time-unit", "The time unit to use for reports", false )
+        .withArg( "stsu", "size-time-size-unit", "The size unit to use for reports", false )
         .withArg( "r", "report", "File for generated report", false )
-        .forArgs(args));
+        .forArgs( args ) );
   }
 
   @Override
@@ -56,6 +64,10 @@ public class ReportCommand extends CommandSupport {
     final String format = arguments.getArgument( "format", "html" );
     final String start = arguments.getArgument( "start", formatDate(defaultPeriod.getBeginningMs()) );
     final String end = arguments.getArgument( "end", formatDate(defaultPeriod.getEndingMs()) );
+    final TimeUnit timeUnit = TimeUnit.fromString( arguments.getArgument( "time-unit", null ), Units.getDefaultDisplayUnits().getTimeUnit() );
+    final SizeUnit sizeUnit = SizeUnit.fromString( arguments.getArgument( "size-unit", null ), Units.getDefaultDisplayUnits().getSizeUnit() );
+    final TimeUnit sizeTimeTimeUnit = TimeUnit.fromString( arguments.getArgument( "size-time-time-unit", timeUnit.name() ), Units.getDefaultDisplayUnits().getSizeTimeTimeUnit() );
+    final SizeUnit sizeTimeSizeUnit = SizeUnit.fromString( arguments.getArgument( "size-time-size-unit", sizeUnit.name() ), Units.getDefaultDisplayUnits().getSizeTimeSizeUnit() );
     final String reportFilename = arguments.getArgument( "file", null );
 
     long startTime = parseDate( start, "start" );
@@ -63,7 +75,8 @@ public class ReportCommand extends CommandSupport {
 
     final String reportData;
     try {
-      reportData = ReportGenerationFacade.generateReport( type, format, startTime, endTime );
+      final Units units = new Units( timeUnit, sizeUnit, sizeTimeTimeUnit, sizeTimeSizeUnit );
+      reportData = ReportGenerationFacade.generateReport( type, format, units, startTime, endTime );
     } catch ( ReportGenerationArgumentException e ) {
       throw new ArgumentException( e.getMessage() );
     } catch ( ReportGenerationException e ) {
